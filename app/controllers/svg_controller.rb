@@ -4,6 +4,7 @@ class SvgController < ApplicationController
 
   def recent_contrib
     require 'open-uri'
+    require 'base64'
 
     d = Date.today
     svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 15.minutes) do
@@ -11,7 +12,9 @@ class SvgController < ApplicationController
         scope_str = ''
         scope_str = io.readline while scope_str.exclude?('data-scope-id')
         {
-          user_id: scope_str[/data-scope-id="(\d+)"/, 1],
+          avatar: Base64.strict_encode64(
+            OpenURI.open_uri("https://avatars3.githubusercontent.com/u/#{scope_str[/data-scope-id="(\d+)"/, 1]}?s=50&v=4").read
+          ),
           contributions: io.readlines.grep(/rect.*(#{[*1..7].map { |n| (d - n).strftime } * '|'})/).map { |line|
             {
               date: line[/date="(\d{4}-\d{2}-\d{2})"/, 1],
@@ -22,16 +25,16 @@ class SvgController < ApplicationController
         }
       end
     end
-    Rails.logger.debug svg_data
-    user_id = svg_data[:user_id]
+    avatar = svg_data[:avatar]
     contributions = svg_data[:contributions]
+    Rails.logger.debug contributions
 
     size = 200
     font_size = 20
     span = 5
     xoffset = font_size * 8
-    svg = %[<svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}">
-    <image href="https://avatars3.githubusercontent.com/u/#{user_id}?s=50&v=4" width="#{size}" height="#{size}" />
+    svg = %[<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 #{size} #{size}" width="#{size}" height="#{size}">
+    <image xlink:href="data:image/png;base64,#{avatar}" x="0" y="0" width="#{size}" height="#{size}" />
     <rect width="#{size}" height="#{size}" fill="#ffffff" opacity="0.8" />
     <g transform="translate(10,14)" font-family="monospace,sans-serif" font-size="#{font_size}">
     #{contributions.each_with_index.reduce('') { |acc, (contrib, idx)|

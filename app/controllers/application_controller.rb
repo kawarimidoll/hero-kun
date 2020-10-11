@@ -1,5 +1,15 @@
 class ApplicationController < ActionController::API
   include ActionView::Layouts
+  rescue_from StandardError, with: :response_500
+
+  def response_500(e = nil)
+    if e
+      Rails.logger.error e
+      Rails.logger.error Rails.backtrace_cleaner.clean(e.backtrace).join("\n").indent(1)
+    end
+
+    head :internal_server_error
+  end
 end
 # Modules in ActionController::Base but not in API
 # AbstractController::Translation,

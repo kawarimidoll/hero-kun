@@ -6,43 +6,26 @@ class SvgController < ApplicationController
     require 'open-uri'
     username = 'kawarimidoll'
     url = "https://github.com/#{username}"
-    begin
-      d = Date.today
-      svg_data = Rails.cache.fetch("#{d.strftime}-#{username}", expires_in: 15.minutes) do
-        OpenURI.open_uri(url) do |io|
-          scope_str = ''
-          scope_str = io.readline while scope_str.exclude?('data-scope-id')
-          {
-            user_id: scope_str[/data-scope-id="(\d+)"/, 1],
-            contributions: io.readlines.grep(/rect.*(#{[*1..7].map { |n| (d - n).strftime } * '|'})/).map { |line|
-              {
-                date: line[/date="(\d{4}-\d{2}-\d{2})"/, 1],
-                count: line[/count="(\d+)"/, 1],
-                fill: line[/fill="(#[\da-f]{6})"/, 1]
-              }
+    d = Date.today
+    svg_data = Rails.cache.fetch("#{d.strftime}-#{username}", expires_in: 15.minutes) do
+      OpenURI.open_uri(url) do |io|
+        scope_str = ''
+        scope_str = io.readline while scope_str.exclude?('data-scope-id')
+        {
+          user_id: scope_str[/data-scope-id="(\d+)"/, 1],
+          contributions: io.readlines.grep(/rect.*(#{[*1..7].map { |n| (d - n).strftime } * '|'})/).map { |line|
+            {
+              date: line[/date="(\d{4}-\d{2}-\d{2})"/, 1],
+              count: line[/count="(\d+)"/, 1],
+              fill: line[/fill="(#[\da-f]{6})"/, 1]
             }
           }
-        end
+        }
       end
-      # contributions = OpenURI.open_uri(url) { |io|
-      #     io.readlines.grep(/fill.*(#{[*(1..7)].map { |n| d.prev_day(n).strftime }.join('|')})/)
-      #   }.map { |line|
-      #     {
-      #       date: line[/date="(\d{4}-\d{2}-\d{2})"/, 1],
-      #       count: line[/count="(\d+)"/, 1],
-      #       fill: line[/fill="(#[\da-f]{6})"/, 1]
-      #     }
-      #   }
-      Rails.logger.debug svg_data
-      user_id = svg_data[:user_id]
-      contributions = svg_data[:contributions]
-    rescue OpenURI::HTTPError => e
-      Rails.logger.warn e
-      return head :not_found
-    rescue => e
-      Rails.logger.error e
-      return head :internal_server_error
     end
+    Rails.logger.debug svg_data
+    user_id = svg_data[:user_id]
+    contributions = svg_data[:contributions]
 
     size = 200
     font_size = 20
@@ -62,5 +45,8 @@ class SvgController < ApplicationController
     Rails.logger.info svg
 
     render inline: svg
+  rescue OpenURI::HTTPError => e
+    Rails.logger.warn e
+    head :not_found
   end
 end

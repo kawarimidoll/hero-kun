@@ -4,11 +4,10 @@ class SvgController < ApplicationController
 
   def recent_contrib
     require 'open-uri'
-    username = 'kawarimidoll'
-    url = "https://github.com/#{username}"
+
     d = Date.today
-    svg_data = Rails.cache.fetch("#{d.strftime}-#{username}", expires_in: 15.minutes) do
-      OpenURI.open_uri(url) do |io|
+    svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 15.minutes) do
+      OpenURI.open_uri("https://github.com/#{params[:username]}") do |io|
         scope_str = ''
         scope_str = io.readline while scope_str.exclude?('data-scope-id')
         {
@@ -32,19 +31,19 @@ class SvgController < ApplicationController
     span = 5
     xoffset = font_size * 8
     svg = %[<svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}">
-    <image href="https://avatars3.githubusercontent.com/u/#{user_id}?s=200&v=4" width="#{size}" height="#{size}" />
+    <image href="https://avatars3.githubusercontent.com/u/#{user_id}?s=50&v=4" width="#{size}" height="#{size}" />
     <rect width="#{size}" height="#{size}" fill="#ffffff" opacity="0.8" />
     <g transform="translate(10,14)" font-family="monospace,sans-serif" font-size="#{font_size}">
     #{contributions.each_with_index.reduce('') { |acc, (contrib, idx)|
     yoffset = (font_size + span) * idx
     %[#{acc}
       <text y="#{yoffset + font_size}">#{contrib[:date]}: #{contrib[:count]}</text>
-      <rect x="#{xoffset}" y="#{yoffset}" width="#{font_size}" height="#{font_size}" fill="#{contrib[:fill]}" />]
+      <rect x="#{xoffset}" y="#{yoffset}" width="#{font_size}" height="#{font_size}" fill="#{contrib[:fill]}" stroke="gray" stroke-width="1" />]
     }}
     </g></svg>]
     Rails.logger.info svg
 
-    render inline: svg
+    render inline: svg, format: :svg
   rescue OpenURI::HTTPError => e
     Rails.logger.warn e
     head :not_found

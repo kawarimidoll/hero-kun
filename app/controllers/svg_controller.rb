@@ -24,7 +24,7 @@ class SvgController < ApplicationController
               count: line[/count="(\d+)"/, 1],
               fill: line[/fill="(#[\da-f]{6})"/, 1]
             }
-          }
+          }.reverse
         }
       end
     end
@@ -32,15 +32,15 @@ class SvgController < ApplicationController
     contributions = svg_data[:contributions]
     Rails.logger.debug contributions
 
-    return render plain: contributions.to_json if params[:format] == 'json'
+    return render inline: contributions.to_json, format: :json if params[:format] == 'json'
 
     size = 200
-    font_size = 20
-    span = 5
+    font_size = size / 10
+    span = font_size / 4
     xoffset = font_size * 8
     svg = %[<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 #{size} #{size}" width="#{size}" height="#{size}">
-    <image xlink:href="data:image/png;base64,#{avatar}" x="0" y="0" width="#{size}" height="#{size}" />
-    <rect width="#{size}" height="#{size}" fill="#ffffff" opacity="0.8" />
+    <image href="data:image/png;base64,#{avatar}" x="0" y="0" width="#{size}" height="#{size}" />
+    <rect width="#{size}" height="#{size}" fill="#fff" opacity="0.8" />
     <g transform="translate(10,14)" font-family="monospace,sans-serif" font-size="#{font_size}">
     #{contributions.each_with_index.reduce('') { |acc, (contrib, idx)|
     yoffset = (font_size + span) * idx
@@ -49,7 +49,7 @@ class SvgController < ApplicationController
       <rect x="#{xoffset}" y="#{yoffset}" width="#{font_size}" height="#{font_size}" fill="#{contrib[:fill]}" stroke="gray" stroke-width="1" />]
     }}
     </g></svg>]
-    Rails.logger.info svg
+    Rails.logger.debug svg
 
     render inline: svg, format: :svg
   rescue OpenURI::HTTPError => e

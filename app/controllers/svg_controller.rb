@@ -6,6 +6,9 @@ class SvgController < ApplicationController
     require 'open-uri'
     require 'base64'
 
+    Rails.logger.debug params
+    raise "Invalid Format: #{params[:format]}" if params[:format].present? && ['svg', 'json'].exclude?(params[:format])
+
     d = Date.today
     svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 15.minutes) do
       OpenURI.open_uri("https://github.com/#{params[:username]}") do |io|
@@ -28,6 +31,8 @@ class SvgController < ApplicationController
     avatar = svg_data[:avatar]
     contributions = svg_data[:contributions]
     Rails.logger.debug contributions
+
+    return render plain: contributions.to_json if params[:format] == 'json'
 
     size = 200
     font_size = 20

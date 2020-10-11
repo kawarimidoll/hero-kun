@@ -1,2 +1,25 @@
 class ApplicationController < ActionController::API
+  include ActionView::Layouts
 end
+# Modules in ActionController::Base but not in API
+# AbstractController::Translation,
+# AbstractController::AssetPaths,
+# ActionController::Helpers,
+# ActionView::Layouts,
+# ActionController::Rendering,
+# ActionController::EtagWithTemplateDigest,
+# ActionController::EtagWithFlash,
+# ActionController::Caching,
+# ActionController::MimeResponds,
+# ActionController::ImplicitRender,
+# ActionController::ParameterEncoding,
+# ActionController::Cookies,
+# ActionController::Flash,
+# ActionController::FormBuilder,
+# ActionController::RequestForgeryProtection,
+# ActionController::ContentSecurityPolicy,
+# ActionController::FeaturePolicy,
+# ActionController::Streaming,
+# HttpAuthentication::Basic::ControllerMethods,
+# HttpAuthentication::Digest::ControllerMethods,
+# HttpAuthentication::Token::ControllerMethods,

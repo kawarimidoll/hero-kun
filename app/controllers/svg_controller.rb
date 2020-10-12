@@ -1,5 +1,12 @@
 class SvgController < ApplicationController
   def today
+    d = Date.today
+    render inline: %[<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 400 300" width="400" height="300">
+      <rect width="400" height="300" stroke="#000" fill="#fff" />
+      <g text-anchor="middle" font-weight="bold" transform="translate(200,0)">
+      <text y="130" font-size="100">#{d.strftime('%m/%d')}</text>
+      <text y="250" font-size="80" fill="##{d.sunday? ? 'd00' : '000'}">#{d.strftime('%a').upcase}</text>
+      </g></svg>]
   end
 
   def recent_contrib

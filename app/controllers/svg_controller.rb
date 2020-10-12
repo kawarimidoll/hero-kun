@@ -17,7 +17,7 @@ class SvgController < ApplicationController
     raise "Invalid Format: #{params[:format]}" if params[:format].present? && ['svg', 'json'].exclude?(params[:format])
 
     d = Date.today
-    svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 15.minutes) do
+    svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 24.hours) do
       OpenURI.open_uri("https://github.com/#{params[:username]}") do |io|
         userid = ''
         userid = io.readline[/data-scope-id="(\d+)"/, 1] while userid.blank?

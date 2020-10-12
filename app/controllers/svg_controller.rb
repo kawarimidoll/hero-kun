@@ -19,11 +19,11 @@ class SvgController < ApplicationController
     d = Date.today
     svg_data = Rails.cache.fetch("#{d.strftime}-#{params[:username]}", expires_in: 15.minutes) do
       OpenURI.open_uri("https://github.com/#{params[:username]}") do |io|
-        scope_str = ''
-        scope_str = io.readline while scope_str.exclude?('data-scope-id')
+        userid = ''
+        userid = io.readline[/data-scope-id="(\d+)"/, 1] while userid.blank?
         {
           avatar: Base64.strict_encode64(
-            OpenURI.open_uri("https://avatars3.githubusercontent.com/u/#{scope_str[/data-scope-id="(\d+)"/, 1]}?s=50&v=4").read
+            OpenURI.open_uri("https://avatars3.githubusercontent.com/u/#{userid}?s=50&v=4").read
           ),
           contributions: io.readlines.grep(/rect.*(#{[*1..7].map { |n| (d - n).strftime } * '|'})/).map { |line|
             {

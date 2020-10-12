@@ -1,24 +1,21 @@
-# README
+# hero-kun
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Tiny Rails app on Heroku.
 
-Things you may want to cover:
+entrypoint: `https://kawarimidoll.herokuapp.com`
 
-* Ruby version
+## today
 
-* System dependencies
+`https://kawarimidoll.herokuapp.com/today`
 
-* Configuration
+![](https://kawarimidoll.herokuapp.com/today.svg)
 
-* Database creation
+The image of date.
 
-* Database initialization
+## recent_contrib
 
-* How to run the test suite
+`https://kawarimidoll.herokuapp.com/recent_contrib/:username`
 
-* Services (job queues, cache servers, search engines, etc.)
+![](https://kawarimidoll.herokuapp.com/recent_contrib/kawarimidoll.svg)
 
-* Deployment instructions
-
-* ...
+The image of GitHub contributions of week.

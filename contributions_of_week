@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# this is prototype of 'recent_contrib'
+echo "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"200\" width=\"200\"> \
+  <rect height=\"200\" width=\"200\" fill=\"#ffffff\"></rect><g transform=\"translate(10,14)\"> \
+  $(curl -sS https://github.com/kawarimidoll | \
+  grep -E "fill.*($(seq 7 | xargs -I_ date --date _' days ago' +%Y-%m-%d | paste -s -d '|' -))" | \
+  sed -r 's/.+fill="(#[0-9a-f]+)".+count="([0-9]+)".+date="([0-9\-]+)".+/\3 \2 \1/' | \
+  awk 'BEGIN{
+    f = 20
+    o = 0
+  } {
+    print "<text y=\"" o+f "\" font-family=\"monospace,sans-serif\" font-size=\"" f "\">" $1 ": " $2 "</text>"
+    print "<rect x=\"" f*8 "\" y=\"" o "\" width=\"" f "\" height=\"" f "\" fill=\"" $3 "\"></rect>"
+    o += f + 5
+  }')</g></svg>" > "contribution_of_week.svg"
